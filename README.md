@@ -82,12 +82,15 @@ From the **project root**:
 ./scripts/compile.sh
 java -cp out com.hotel.oop.HotelServerApp
 ```
+---
 
-- Guest site: [http://localhost:8080/](http://localhost:8080/) — use **Sign in** before booking.
-- Auth / admin entry: [http://localhost:8080/auth.html](http://localhost:8080/auth.html) (use **Admin login** for staff).
-- Dashboard (requires admin token): [http://localhost:8080/admin.html](http://localhost:8080/admin.html) — redirects to auth if not logged in as admin.
+## 🌐 Live Demo
+[hotel-reservation-system-production-7d4a.up.railway.app](https://hotel-reservation-system-production-7d4a.up.railway.app)
 
-Watch the terminal for **Observer** log lines when you confirm or reject bookings.
+---
+
+## 🚀 Deployment
+Deployed on [Railway](https://railway.app) using a custom `Dockerfile` with Eclipse Temurin JDK 17.
 
 ---
 
