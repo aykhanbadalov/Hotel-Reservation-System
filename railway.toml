@@ -5,4 +5,4 @@ builder = "nixpacks"
 providers = ["java"]
 
 [deploy]
-startCommand = "find /nix -name 'javac' 2>/dev/null | head -1 | xargs -I{} dirname {} | xargs -I{} env PATH={}:$PATH sh -c 'javac -d out -sourcepath src $(find src -name \"*.java\") && java -cp out com.hotel.oop.HotelServerApp'"
+startCommand = "mkdir -p out && find /nix/store -name 'javac' 2>/dev/null | head -1 | sed 's|/javac||' > /tmp/jpath && export PATH=$(cat /tmp/jpath):$PATH && javac -d out -sourcepath src $(find src -name '*.java') && java -cp out com.hotel.oop.HotelServerApp"
