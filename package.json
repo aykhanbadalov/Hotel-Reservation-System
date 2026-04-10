@@ -1,0 +1,13 @@
+{
+  "name": "hotel-oop-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tailwind build for the Hotel OOP static UI",
+  "scripts": {
+    "build:css": "tailwindcss -i ./frontend/src/input.css -o ./frontend/public/style.css --minify",
+    "watch:css": "tailwindcss -i ./frontend/src/input.css -o ./frontend/public/style.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -1,0 +1,176 @@
+@startuml HotelReservation_OOP_ClassDiagram
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+package "models.interfaces" {
+  interface Bookable {
+    + confirmBooking()
+    + cancelBooking()
+  }
+  interface Payable {
+    + processPayment(amount: double): boolean
+  }
+  interface Searchable {
+    + searchByCriteria(criteria: SearchCriteria): List~Room~
+  }
+}
+
+package "models.room" {
+  abstract class Room {
+    - id: long
+    - roomNumber: String
+    - maxGuests: int
+    - description: String
+    + getBaseRatePerNight(): double {abstract}
+    + getRoomType(): RoomType {abstract}
+    + calculatePrice(nights: int, strategy: PricingStrategy): double
+    + equals(o: Object): boolean
+    + hashCode(): int
+  }
+  class StandardRoom
+  class SuiteRoom
+  enum RoomType {
+    STANDARD
+    SUITE
+  }
+}
+
+package "models.user" {
+  abstract class User {
+    - id: long
+    - fullName: String
+    - email: String
+    + getRole(): String {abstract}
+    + equals(o: Object): boolean
+    + hashCode(): int
+  }
+  class Guest
+  class Admin
+}
+
+package "models" {
+  class Reservation {
+    - id: long
+    - checkIn: LocalDate
+    - checkOut: LocalDate
+    - status: ReservationStatus
+    - totalPrice: double
+    + getNights(): int
+    + confirmBooking()
+    + rejectBooking()
+    + cancelBooking()
+    + equals(o: Object): boolean
+    + hashCode(): int
+  }
+  enum ReservationStatus {
+    PENDING
+    CONFIRMED
+    REJECTED
+  }
+}
+
+package "patterns.pricing <<Strategy>>" {
+  interface PricingStrategy {
+    + calculateTotal(baseRatePerNight: double, nights: int): double
+  }
+  class RegularPricingStrategy
+  class WeekendPricingStrategy
+  class PricingStrategyFactory
+}
+
+package "patterns.notification <<Observer>>" {
+  interface ReservationObserver {
+    + onReservationConfirmed(reservation: Reservation)
+  }
+  class ReservationSubject {
+    + attach(observer: ReservationObserver)
+    + notifyReservationConfirmed(reservation: Reservation)
+  }
+  class EmailNotificationObserver
+  class SmsNotificationObserver
+}
+
+package "services" {
+  class RoomCatalogService {
+    + registerRoom(room: Room)
+    + findById(id: long): Optional~Room~
+    + isAvailable(...): boolean
+    + searchByCriteria(criteria: SearchCriteria): List~Room~
+  }
+  class ReservationService {
+    + searchAvailableRooms(criteria: SearchCriteria): List~Room~
+    + quoteStay(room: Room, in: LocalDate, out: LocalDate): double
+    + createReservation(...): Reservation
+    + allReservations(): Collection~Reservation~
+  }
+  class PaymentService {
+    + processPayment(amount: double): boolean
+  }
+}
+
+package "services.search" {
+  class SearchCriteria
+}
+
+package "http <<JDK HttpServer>>" {
+  class HotelServerApp {
+    + main(args: String[])
+  }
+  class ApiHttpHandler
+  class StaticFileHandler
+  class HotelApiFacade
+  class JsonUtil <<utility>>
+}
+
+' --- Relationships ---
+Room <|-- StandardRoom
+Room <|-- SuiteRoom
+User <|-- Guest
+User <|-- Admin
+
+Reservation ..|> Bookable
+Reservation *-- Room : composition
+Reservation *-- Guest : composition
+
+RoomCatalogService ..|> Searchable
+PaymentService ..|> Payable
+
+PricingStrategy <|.. RegularPricingStrategy
+PricingStrategy <|.. WeekendPricingStrategy
+PricingStrategyFactory ..> PricingStrategy : creates
+
+ReservationObserver <|.. EmailNotificationObserver
+ReservationObserver <|.. SmsNotificationObserver
+ReservationSubject o--> ReservationObserver : notifies
+
+ReservationService ..> RoomCatalogService
+ReservationService ..> Payable
+ReservationService ..> PricingStrategyFactory
+ReservationService ..> ReservationSubject
+ReservationService ..> Reservation : creates
+
+Room ..> PricingStrategy : calculatePrice uses
+
+HotelServerApp ..> ApiHttpHandler
+HotelServerApp ..> StaticFileHandler
+HotelServerApp ..> ReservationService : wires manually
+ApiHttpHandler --> HotelApiFacade : uses
+HotelApiFacade --> ReservationService : uses
+
+note right of Room
+  **Abstract class #1**
+  Template hook: getBaseRatePerNight()
+  Strategy for calculatePrice(...)
+end note
+
+note right of User
+  **Abstract class #2**
+  Hook: getRole()
+end note
+
+note bottom of Reservation
+  **Composition**: aggregates Room + Guest
+end note
+
+@enduml

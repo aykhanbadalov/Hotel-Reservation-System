@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Hotel OOP — Admin</title>
+    <link rel="stylesheet" href="style.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body class="h-full bg-slate-50 font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+<header class="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <div>
+            <h1 class="text-xl font-bold">Admin dashboard</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Booking approvals, inventory, reservation log</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="index.html" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">Guest site</a>
+            <button id="themeToggle" type="button"
+                    class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white dark:bg-teal-600">Theme
+            </button>
+            <button id="refreshBtn" type="button"
+                    class="rounded-lg bg-teal-600 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-500">Refresh all
+            </button>
+            <button id="adminLogout" type="button"
+                    class="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/30">Log out
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="mx-auto max-w-6xl space-y-10 px-4 py-8">
+    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Pending requests</p>
+            <p id="statPending" class="mt-2 text-2xl font-bold">0</p>
+        </article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total reservations</p>
+            <p id="statReservations" class="mt-2 text-2xl font-bold">0</p>
+        </article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rooms in inventory</p>
+            <p id="statRooms" class="mt-2 text-2xl font-bold">0</p>
+        </article>
+    </section>
+
+    <section>
+        <h2 class="text-lg font-semibold">Booking requests</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Pending guest requests — confirm (charges payment + notifies) or reject (notifies).</p>
+        <p id="pendingStatus" class="mt-2 text-sm text-slate-500"></p>
+        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+                <tr>
+                    <th class="px-4 py-3">ID</th>
+                    <th class="px-4 py-3">Guest</th>
+                    <th class="px-4 py-3">Room</th>
+                    <th class="px-4 py-3">Stay</th>
+                    <th class="px-4 py-3 text-right">Total</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="pendingBody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="text-lg font-semibold">Rooms management</h2>
+        <form id="roomForm" class="mt-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 lg:grid-cols-3">
+            <input type="hidden" name="editId" id="roomEditId" value=""/>
+            <label class="block text-xs font-medium">Type
+                <select name="roomType" required class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+                    <option value="STANDARD">Standard</option>
+                    <option value="SUITE">Suite</option>
+                </select>
+            </label>
+            <label class="block text-xs font-medium">Room number
+                <input name="roomNumber" required class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"/>
+            </label>
+            <label class="block text-xs font-medium">Max guests
+                <input name="maxGuests" type="number" min="1" required value="2" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"/>
+            </label>
+            <label class="block text-xs font-medium sm:col-span-2">Description
+                <input name="description" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"/>
+            </label>
+            <label class="block text-xs font-medium">Base rate / night
+                <input name="baseRatePerNight" type="number" step="0.01" min="0" required class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"/>
+            </label>
+            <div class="flex items-end gap-2">
+                <button type="submit" id="roomSubmitBtn" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500">Add room</button>
+                <button type="button" id="roomCancelEdit" class="hidden rounded-lg border border-slate-200 px-4 py-2 text-sm dark:border-slate-600">Cancel edit</button>
+            </div>
+        </form>
+        <p id="roomFormMsg" class="mt-2 text-sm text-red-600 dark:text-red-400"></p>
+        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+                <tr>
+                    <th class="px-4 py-3">ID</th>
+                    <th class="px-4 py-3">#</th>
+                    <th class="px-4 py-3">Type</th>
+                    <th class="px-4 py-3">Guests</th>
+                    <th class="px-4 py-3">Rate</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="roomsBody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="text-lg font-semibold">All reservations</h2>
+        <p id="adminStatus" class="mb-2 text-sm text-slate-500 dark:text-slate-400"></p>
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+                <tr>
+                    <th class="px-4 py-3">ID</th>
+                    <th class="px-4 py-3">Guest</th>
+                    <th class="px-4 py-3">Room</th>
+                    <th class="px-4 py-3">Stay</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3 text-right">Total</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="resBody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="api-client.js"></script>
+<script src="app.js"></script>
+<script>
+    async function protectAdminPage() {
+        if (!localStorage.getItem('hotelOopAdmin')) {
+            window.location.href = 'auth.html?admin=1';
+            return false;
+        }
+        try {
+            await hotelFetchJson(`${API}/admin/reservations/pending`, {}, 'admin');
+            return true;
+        } catch (_) {
+            clearAdminSession();
+            window.location.href = 'auth.html?admin=1';
+            return false;
+        }
+    }
+
+    async function loadPendingRequests() {
+        const body = document.getElementById('pendingBody');
+        const status = document.getElementById('pendingStatus');
+        status.textContent = 'Loading…';
+        body.innerHTML = '';
+        try {
+            const rows = await hotelFetchJson(`${API}/admin/reservations/pending`, {}, 'admin');
+            status.textContent = rows.length ? `${rows.length} pending` : 'No pending requests.';
+            document.getElementById('statPending').textContent = String(rows.length);
+            rows.forEach((r) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40';
+                tr.innerHTML = `
+            <td class="px-4 py-3 font-mono text-xs">${r.id}</td>
+            <td class="px-4 py-3"><div class="font-medium">${r.guestName}</div><div class="text-xs text-slate-500">${r.guestEmail}</div></td>
+            <td class="px-4 py-3">${r.roomNumber}</td>
+            <td class="px-4 py-3 text-xs">${r.checkIn} → ${r.checkOut}</td>
+            <td class="px-4 py-3 text-right font-semibold">${formatCurrency(r.totalPrice)}</td>
+            <td class="px-4 py-3 text-right space-x-2">
+              <button type="button" data-confirm="${r.id}" class="rounded bg-emerald-600 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-500">Confirm</button>
+              <button type="button" data-reject="${r.id}" class="rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-500">Reject</button>
+            </td>`;
+                body.appendChild(tr);
+            });
+            body.querySelectorAll('[data-confirm]').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-confirm');
+                    try {
+                        await hotelFetchJson(`${API}/admin/reservations/${id}/confirm`, { method: 'POST', body: '{}' }, 'admin');
+                        refreshAll();
+                    } catch (err) {
+                        status.textContent = err.message;
+                    }
+                });
+            });
+            body.querySelectorAll('[data-reject]').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-reject');
+                    try {
+                        await hotelFetchJson(`${API}/admin/reservations/${id}/reject`, { method: 'POST', body: '{}' }, 'admin');
+                        refreshAll();
+                    } catch (err) {
+                        status.textContent = err.message;
+                    }
+                });
+            });
+        } catch (e) {
+            status.textContent = e.message;
+            document.getElementById('statPending').textContent = '0';
+        }
+    }
+
+    async function loadRoomsTable() {
+        const body = document.getElementById('roomsBody');
+        body.innerHTML = '';
+        let rooms;
+        try {
+            rooms = await hotelFetchJson(`${API}/admin/rooms`, {}, 'admin');
+        } catch (e) {
+            document.getElementById('roomFormMsg').textContent = e.message;
+            document.getElementById('statRooms').textContent = '0';
+            return;
+        }
+        rooms.forEach((room) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40';
+            tr.innerHTML = `
+        <td class="px-4 py-3 font-mono text-xs">${room.id}</td>
+        <td class="px-4 py-3 font-medium">${room.roomNumber}</td>
+        <td class="px-4 py-3">${room.roomType}</td>
+        <td class="px-4 py-3">${room.maxGuests}</td>
+        <td class="px-4 py-3">${formatCurrency(room.baseRatePerNight)}</td>
+        <td class="px-4 py-3 text-right space-x-2">
+          <button type="button" data-edit="${room.id}" class="text-xs font-semibold text-teal-600 hover:underline dark:text-teal-400">Edit</button>
+          <button type="button" data-del="${room.id}" class="text-xs font-semibold text-rose-600 hover:underline dark:text-rose-400">Delete</button>
+        </td>`;
+            body.appendChild(tr);
+        });
+        document.getElementById('statRooms').textContent = String(rooms.length);
+        body.querySelectorAll('[data-edit]').forEach((btn) => {
+            btn.addEventListener('click', () => startEditRoom(rooms.find((x) => String(x.id) === btn.getAttribute('data-edit'))));
+        });
+        body.querySelectorAll('[data-del]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('Delete this room?')) return;
+                const id = btn.getAttribute('data-del');
+                try {
+                    await hotelFetchJson(`${API}/admin/rooms/${id}`, { method: 'DELETE' }, 'admin');
+                    document.getElementById('roomFormMsg').textContent = '';
+                    refreshAll();
+                } catch (err) {
+                    document.getElementById('roomFormMsg').textContent = err.message;
+                }
+            });
+        });
+    }
+
+    function startEditRoom(room) {
+        document.getElementById('roomEditId').value = room.id;
+        const f = document.getElementById('roomForm');
+        f.elements['roomType'].value = room.roomType;
+        f.elements['roomNumber'].value = room.roomNumber;
+        f.elements['maxGuests'].value = room.maxGuests;
+        f.elements['description'].value = room.description || '';
+        f.elements['baseRatePerNight'].value = room.baseRatePerNight;
+        document.getElementById('roomSubmitBtn').textContent = 'Save room';
+        document.getElementById('roomCancelEdit').classList.remove('hidden');
+    }
+
+    function resetRoomForm() {
+        document.getElementById('roomEditId').value = '';
+        document.getElementById('roomForm').reset();
+        document.getElementById('roomForm').elements['maxGuests'].value = 2;
+        document.getElementById('roomSubmitBtn').textContent = 'Add room';
+        document.getElementById('roomCancelEdit').classList.add('hidden');
+    }
+
+    document.getElementById('roomCancelEdit').addEventListener('click', resetRoomForm);
+
+    document.getElementById('roomForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById('roomFormMsg');
+        msg.textContent = '';
+        const fd = new FormData(e.target);
+        const payload = {
+            roomType: fd.get('roomType'),
+            roomNumber: fd.get('roomNumber'),
+            maxGuests: Number(fd.get('maxGuests')),
+            description: fd.get('description') || '',
+            baseRatePerNight: Number(fd.get('baseRatePerNight')),
+        };
+        const editId = document.getElementById('roomEditId').value;
+        try {
+            if (editId) {
+                await hotelFetchJson(`${API}/admin/rooms/${editId}`, { method: 'PUT', body: JSON.stringify(payload) }, 'admin');
+            } else {
+                await hotelFetchJson(`${API}/admin/rooms`, { method: 'POST', body: JSON.stringify(payload) }, 'admin');
+            }
+            resetRoomForm();
+            refreshAll();
+        } catch (err) {
+            msg.textContent = err.message;
+        }
+    });
+
+    function refreshAll() {
+        loadAdminTable();
+        loadPendingRequests();
+        loadRoomsTable();
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', refreshAll);
+    document.getElementById('adminLogout').addEventListener('click', async () => {
+        try {
+            await hotelFetchJson(`${API}/auth/logout`, { method: 'POST', body: '{}' }, 'admin');
+        } catch (_) { /* ignore */ }
+        clearAdminSession();
+        window.location.href = 'auth.html?admin=1';
+    });
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const ok = await protectAdminPage();
+        if (!ok) return;
+        refreshAll();
+    });
+</script>
+</body>
+</html>
