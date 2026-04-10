@@ -28,7 +28,9 @@ import java.util.concurrent.Executors;
 public class HotelServerApp {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        int port = 8080;
+        int port = Integer.parseInt(
+            System.getenv().getOrDefault("PORT", "8080")
+        );
         if (args.length >= 1) {
             port = Integer.parseInt(args[0]);
         }
