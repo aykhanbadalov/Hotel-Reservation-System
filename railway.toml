@@ -1,9 +1,0 @@
-[build]
-builder = "nixpacks"
-buildCommand = "javac -d out -sourcepath src $(find src -name '*.java')"
-
-[build.nixpacks]
-pkgs = ["jdk17", "nodejs_18"]
-
-[deploy]
-startCommand = "java -cp out com.hotel.oop.HotelServerApp"
